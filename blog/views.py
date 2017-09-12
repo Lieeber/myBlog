@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
 
@@ -5,10 +6,13 @@ from django.views.generic import ListView, DetailView
 # Create your views here.
 import markdown
 import pygments
+from markdown.extensions.toc import TocExtension
+
 from comments.forms import CommentForm
 
 from blog.models import Post, Category, Tag
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.utils.text import slugify
 
 
 class IndexView(ListView):
@@ -183,7 +187,8 @@ class PostDetailView(DetailView):
         md = markdown.Markdown(extensions=[
             'markdown.extensions.extra',
             'markdown.extensions.codehilite',
-            'markdown.extensions.toc',
+            # 记得在顶部引入 TocExtension 和 slugify
+            TocExtension(slugify=slugify),
         ])
         # 如果不把正文中的TOC去掉，那么在正文中也会显示目录，我们现在只想在侧边显示目录
         post.body = md.convert(post.body.replace('[TOC]', ''))
@@ -281,3 +286,16 @@ def about(request):
 
 def contact(request):
     return render(request, 'blog/contact.html')
+
+
+def search(request):
+    q = request.GET.get('q')
+    error_msg = ''
+    if not q:
+        error_msg = "请输入关键词"
+        return render(request, 'blog/index.html', {'error_msg': error_msg})
+    post_list = Post.objects.filter(Q(title__icontains=q) | Q(body__contains=q))
+    return render(request, 'blog/index.html', {
+        'error_msg': error_msg,
+        'post_list': post_list
+    })
