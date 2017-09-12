@@ -1,9 +1,10 @@
+import markdown
 from django.contrib.auth.models import User
 from django.db import models
 
-
 # Create your models here.
 from django.urls import reverse
+from django.utils.html import strip_tags
 
 
 class Category(models.Model):
@@ -44,6 +45,19 @@ class Post(models.Model):
     # 存储比较短的字符串可以使用 CharField，但对于文章的正文来说可能会是一大段文本，因此使用 TextField 来存储大段文本。
     body = models.TextField()
 
+    def save(self, force_insert=False, force_update=False, using=None,
+             update_fields=None):
+        if not self.excerpt:
+            md = markdown.Markdown(extensions=[
+                'markdown.extensions.extra',
+                'markdown.extensions.codehilite',
+            ])
+            # 先将 Markdown 文本渲染成 HTML 文本
+            # strip_tags 去掉 HTML 文本的全部 HTML 标签
+            # 从文本摘取前 54 个字符赋给 excerpt
+            self.excerpt = strip_tags(md.convert(self.body))[:54]
+        super(Post, self).save(force_insert, force_update, using, update_fields)
+
     # 这两个列分别表示文章的创建时间和最后一次修改时间，存储时间的字段用 DateTimeField 类型。
     created_time = models.DateTimeField(auto_now_add=True)
     modified_time = models.DateTimeField(auto_now=True)
@@ -68,13 +82,18 @@ class Post(models.Model):
     # 因为我们规定一篇文章只能有一个作者，而一个作者可能会写多篇文章，因此这是一对多的关联关系，和 Category 类似。
     author = models.ForeignKey(User)
 
+    # 用来统计文章的阅读量
+    views = models.PositiveIntegerField(default=0)
+
     def __str__(self):
         return self.title
 
     def get_absolute_url(self):
-        return reverse('blog:detail',kwargs={'pk': self.pk})
+        return reverse('blog:detail', kwargs={'pk': self.pk})
 
+    def increase_views(self):
+        self.views += 1
+        self.save(update_fields=['views'])
 
     class Meta:
-        ordering = ['-created_time','title']
-
+        ordering = ['-created_time', 'title']
