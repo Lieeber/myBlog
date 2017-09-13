@@ -23,7 +23,7 @@ SECRET_KEY = 'k7v_0_3x9d1qwmky91q^n@f8s+_$xv$of)5s*)#sciu1vqa#1*'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-# ALLOWED_HOSTS = ['127.0.0.1', 'localhost ', 'www.barrylee.top']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost ', 'www.barrylee.top']
 ALLOWED_HOSTS = []
 
 # Application definition
@@ -116,4 +116,4 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 # 加入下面的配置
-# STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
