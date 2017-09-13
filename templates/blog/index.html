@@ -2,18 +2,22 @@
 {% load blog_tags %}
 
 {% block main %}
+    {% if error_msg %}
+        <p>{{ error_msg }}</p>
+    {% endif %}
     {% for post in post_list %}
         <article class="post post-{{ post.pk }}">
             <h1 class="entry-title">
                 <a href="{{ post.get_absolute_url }}">{{ post.title }}</a>
             </h1>
             <div class="entry-meta">
-               <span class="post-category"><a href="{% url 'blog:category' post.category.pk %}">{{post.category.name}}</a></span>
-            <span class="post-date"><a href="#"><time class="entry-date"
-                                                      datetime="{{post.created_time}}">{{post.created_time}}</time></a></span>
-            <span class="post-author"><a href="{% url 'blog:about' %}">{{post.author}}</a></span>
-             <span class="comments-link"><a href="#">{{ post.comment_set.count }}评论</a></span>
-             <span class="views-count"><a href="#">{{ post.views }} 阅读</a></span>
+                <span class="post-category"><a
+                        href="{% url 'blog:category' post.category.pk %}">{{ post.category.name }}</a></span>
+                <span class="post-date"><a href="#"><time class="entry-date"
+                                                          datetime="{{ post.created_time }}">{{ post.created_time }}</time></a></span>
+                <span class="post-author"><a href="{% url 'blog:about' %}">{{ post.author }}</a></span>
+                <span class="comments-link"><a href="#">{{ post.comment_set.count }}评论</a></span>
+                <span class="views-count"><a href="#">{{ post.views }} 阅读</a></span>
             </div>
             <div class="entry-content clearfix">
                 <p>{{ post.excerpt }}</p>
@@ -64,17 +68,17 @@
 
 {% block tags %}
     <div class="widget widget-tag-cloud">
-                    <h3 class="widget-title">标签云</h3>
-                    {% get_tags as tag_list %}
-                    <ul>
-                        {% for tag in tag_list %}
-                            <li>
-                                <a href="{% url 'blog:tag' tag.pk %}">{{ tag.name }}</a>
-                                <span class="post-count">({{ tag.num_posts }})</span>
-                            </li>
-                        {% empty %}
-                            暂无标签！
-                        {% endfor %}
-                    </ul>
-                </div>
+        <h3 class="widget-title">标签云</h3>
+        {% get_tags as tag_list %}
+        <ul>
+            {% for tag in tag_list %}
+                <li>
+                    <a href="{% url 'blog:tag' tag.pk %}">{{ tag.name }}</a>
+                    <span class="post-count">({{ tag.num_posts }})</span>
+                </li>
+            {% empty %}
+                暂无标签！
+            {% endfor %}
+        </ul>
+    </div>
 {% endblock tags %}
